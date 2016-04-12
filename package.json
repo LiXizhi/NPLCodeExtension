@@ -1,0 +1,35 @@
+{
+    "name": "nplruntime",
+    "displayName": "nplruntime",
+    "description": "",
+    "version": "0.0.1",
+    "publisher": "leio",
+    "engines": {
+        "vscode": "^0.10.10"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+         "onCommand:npl.start",
+        "onCommand:npl.update",
+        "onCommand:npl.test"
+    ],
+    "main": "./out/src/extension",
+    "contributes": {
+       "commands": [
+            {"command": "npl.start","title": "npl start"},
+            {"command": "npl.update","title": "npl update"},
+            {"command": "npl.test","title": "npl test"}
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
+        "compile": "node ./node_modules/vscode/bin/compile -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install"
+    },
+    "devDependencies": {
+        "typescript": "^1.8.5",
+        "vscode": "^0.11.0"
+    }
+}
