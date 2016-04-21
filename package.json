@@ -1,6 +1,6 @@
 {
-    "name": "nplruntime",
-    "displayName": "nplruntime",
+    "name": "nplextension",
+    "displayName": "Npl Extension",
     "description": "",
     "version": "0.0.1",
     "publisher": "leio",
@@ -8,25 +8,62 @@
         "vscode": "^0.10.10"
     },
     "categories": [
-        "Other"
+        "Debuggers","Other"
     ],
     "activationEvents": [
-         "onCommand:npl.start",
+        "onCommand:npl.start",
         "onCommand:npl.update",
-        "onCommand:npl.test"
+        "onCommand:npl.run",
+        "onCommand:npl.test",
+        "onCommand:npldebugger.attach"
     ],
-    "main": "./out/src/extension",
+    "main": "./out/src/Main",
     "contributes": {
        "commands": [
             {"command": "npl.start","title": "npl start"},
             {"command": "npl.update","title": "npl update"},
-            {"command": "npl.test","title": "npl test"}
+            {"command": "npl.run","title": "npl run"},
+            {"command": "npl.test","title": "npl test"},
+            {"command": "npldebugger.attach","title": "npl debugger attach"}
+        ],
+        "debuggers":[
+            {
+                "type":"npl",
+                "label":"Npl",
+                "enableBreakpointsFor": {"languageIds": ["lua"]},
+                "program": "./out/src/NplDebug.js",
+                "runtime": "node",
+                "initialConfigurations":[
+                    {
+                        "name": "Attach with npl",
+                        "type": "npl",
+                        "request": "attach",
+                        "ip": "127.0.0.1",
+                        "port": 8099
+                    }
+                ],
+                "configurationAttributes":{
+                    "attach":{
+                        "required": ["ip", "port"],
+                        "properties":{
+                            "ip" : {"type":"string", "description":"ip to use for npl debugging", "default":"localhost" },
+                            "port" : {"type":"number", "description":"port to use for npl debugging", "default":8099 }
+                        }
+                    }
+                }
+            }
         ]
     },
     "scripts": {
         "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
         "compile": "node ./node_modules/vscode/bin/compile -watch -p ./",
         "postinstall": "node ./node_modules/vscode/bin/install"
+    },
+    "dependencies": {
+        "source-map": "^0.5.3",
+        "vscode-debugadapter": "^1.8.0-pre.4",
+        "vscode-debugprotocol": "^1.8.0-pre.3",
+        "ws": "0.8.0"
     },
     "devDependencies": {
         "typescript": "^1.8.5",

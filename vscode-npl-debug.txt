@@ -1,0 +1,40 @@
+initializeRequest
+setBreakPointsRequest:
+url:c:\Users\leio\Desktop\samples\1. HelloWorld\source\HelloWorld\file1.lua
+lines:3
+setBreakPointsRequest:
+url:c:\Users\leio\Desktop\samples\1. HelloWorld\source\HelloWorld\main.lua
+lines:24,20,18
+pre addbreakpoint:hello
+addbreakpoint:http://undefined:undefined/ajax/vscode_debugger?action=addbreakpoint&filename=c%3A%5CUsers%5Cleio%5CDesktop%5Csamples%5C1.%20HelloWorld%5Csource%5CHelloWorld%5Cfile1.lua&line=3
+load url:c:\Users\leio\Desktop\samples\1. HelloWorld\source\HelloWorld\file1.lua
+pre addbreakpoint:hello
+addbreakpoint:http://undefined:undefined/ajax/vscode_debugger?action=addbreakpoint&filename=c%3A%5CUsers%5Cleio%5CDesktop%5Csamples%5C1.%20HelloWorld%5Csource%5CHelloWorld%5Cmain.lua&line=24
+load url:c:\Users\leio\Desktop\samples\1. HelloWorld\source\HelloWorld\main.lua
+pre addbreakpoint:hello
+addbreakpoint:http://undefined:undefined/ajax/vscode_debugger?action=addbreakpoint&filename=c%3A%5CUsers%5Cleio%5CDesktop%5Csamples%5C1.%20HelloWorld%5Csource%5CHelloWorld%5Cmain.lua&line=20
+load url:c:\Users\leio\Desktop\samples\1. HelloWorld\source\HelloWorld\main.lua
+pre addbreakpoint:hello
+addbreakpoint:http://undefined:undefined/ajax/vscode_debugger?action=addbreakpoint&filename=c%3A%5CUsers%5Cleio%5CDesktop%5Csamples%5C1.%20HelloWorld%5Csource%5CHelloWorld%5Cmain.lua&line=18
+load url:c:\Users\leio\Desktop\samples\1. HelloWorld\source\HelloWorld\main.lua
+attachRequest:127.0.0.1 8099
+load url:http://127.0.0.1:8099/ajax/vscode_debugger?action=attach
+attachRequest received:attach
+setBreakPointsRequest:
+url:c:\Users\leio\Desktop\samples\1. HelloWorld\source\HelloWorld\main.lua
+lines:24,20,18,16
+pre addbreakpoint:hello
+addbreakpoint:http://127.0.0.1:8099/ajax/vscode_debugger?action=addbreakpoint&filename=c%3A%5CUsers%5Cleio%5CDesktop%5Csamples%5C1.%20HelloWorld%5Csource%5CHelloWorld%5Cmain.lua&line=24
+load url:c:\Users\leio\Desktop\samples\1. HelloWorld\source\HelloWorld\main.lua
+pre addbreakpoint:hello
+addbreakpoint:http://127.0.0.1:8099/ajax/vscode_debugger?action=addbreakpoint&filename=c%3A%5CUsers%5Cleio%5CDesktop%5Csamples%5C1.%20HelloWorld%5Csource%5CHelloWorld%5Cmain.lua&line=20
+load url:c:\Users\leio\Desktop\samples\1. HelloWorld\source\HelloWorld\main.lua
+pre addbreakpoint:hello
+addbreakpoint:http://127.0.0.1:8099/ajax/vscode_debugger?action=addbreakpoint&filename=c%3A%5CUsers%5Cleio%5CDesktop%5Csamples%5C1.%20HelloWorld%5Csource%5CHelloWorld%5Cmain.lua&line=18
+load url:c:\Users\leio\Desktop\samples\1. HelloWorld\source\HelloWorld\main.lua
+pre addbreakpoint:hello
+addbreakpoint:http://127.0.0.1:8099/ajax/vscode_debugger?action=addbreakpoint&filename=c%3A%5CUsers%5Cleio%5CDesktop%5Csamples%5C1.%20HelloWorld%5Csource%5CHelloWorld%5Cmain.lua&line=16
+load url:c:\Users\leio\Desktop\samples\1. HelloWorld\source\HelloWorld\main.lua
+disconnectRequest url:http://127.0.0.1:8099/ajax/vscode_debugger?action=stop
+load url:http://127.0.0.1:8099/ajax/vscode_debugger?action=stop
+disconnectRequest received:stop

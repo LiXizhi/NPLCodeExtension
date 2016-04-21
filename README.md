@@ -1,25 +1,11 @@
--- how to generate a new extension
+###how to generate/publish/install a new extension
+* generate a new extension
 npm install -g yo generator-code
 yo code
-
---how to package .vsix 
-details in https://code.visualstudio.com/docs/tools/vscecli
-
---make sure vsce has installed
-npm install -g vsce
-
---This will package your extension into a .vsix file and place it in the current directory
+* publish a new extension
+npm install -g vsce 
 vsce package
-
---install a packaged extension(.vsix)
-details in https://code.visualstudio.com/docs/extensions/install-extension
-
+details in https://code.visualstudio.com/docs/tools/vscecli
+* install a packaged extension(.vsix)
 code myExtensionFolder\nplruntime.vsix
-
-
---npl commands
-npl start:start npl runtime
-npl update:update npl runtime
---run code commands
-press f1
-type npl start
+details in https://code.visualstudio.com/docs/extensions/install-extension

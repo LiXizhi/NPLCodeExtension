@@ -1,0 +1,10 @@
+//npl project default config
+{
+    "name": "project name",
+    "displayName": "",
+    "description": "",
+    "version": "0.0.1",
+    "publisher": "",
+    "main": "./main.lua",
+    "nplprogram":""
+}
