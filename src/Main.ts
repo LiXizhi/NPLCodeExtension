@@ -98,21 +98,10 @@ function get_root() {
 }
 function run() {
     let arr = [0,1,2,3];
-    let ret = arr.reduce((p,cur)=>{
-        return p.then(()=>{
-         console.log("cur:" + cur + "\n");   
-        });
-    },Promise.resolve()).then(()=>{
-         console.log("end\n");   
-        
-    });    
-    let p = Promise.resolve(); 
-    arr.forEach((v)=>{
-        p.then(()=>{
-            p = Promise.resolve();
-        }
-        );
-    });
+    let a = arr.slice();
+    a[0] = 10;
+    console.log(arr);
+    
 }
 function get_runtime_folder() {
     return get_root() + "/nplruntime";

@@ -60,10 +60,8 @@
         "postinstall": "node ./node_modules/vscode/bin/install"
     },
     "dependencies": {
-        "source-map": "^0.5.3",
         "vscode-debugadapter": "^1.8.0-pre.4",
-        "vscode-debugprotocol": "^1.8.0-pre.3",
-        "ws": "0.8.0"
+        "vscode-debugprotocol": "^1.8.0-pre.3"
     },
     "devDependencies": {
         "typescript": "^1.8.5",
