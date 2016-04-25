@@ -17,7 +17,7 @@
         "onCommand:npl.test",
         "onCommand:npldebugger.attach"
     ],
-    "main": "./out/src/Main",
+    "main": "./out/Main",
     "contributes": {
        "commands": [
             {"command": "npl.start","title": "npl start"},
@@ -29,9 +29,9 @@
         "debuggers":[
             {
                 "type":"npl",
-                "label":"Npl",
+                "label":"Npl Debugger",
                 "enableBreakpointsFor": {"languageIds": ["lua"]},
-                "program": "./out/src/NplDebug.js",
+                "program": "./out/debugger/NplDebug.js",
                 "runtime": "node",
                 "initialConfigurations":[
                     {
@@ -39,7 +39,8 @@
                         "type": "npl",
                         "request": "attach",
                         "ip": "127.0.0.1",
-                        "port": 8099
+                        "port": 8099,
+                        "webRoot": "${workspaceRoot}"
                     }
                 ],
                 "configurationAttributes":{
@@ -47,7 +48,8 @@
                         "required": ["ip", "port"],
                         "properties":{
                             "ip" : {"type":"string", "description":"ip to use for npl debugging", "default":"localhost" },
-                            "port" : {"type":"number", "description":"port to use for npl debugging", "default":8099 }
+                            "port" : {"type":"number", "description":"port to use for npl debugging", "default":8099 },
+                            "webRoot" : {"type":"string", "description":"the workspace absolute path of the webserver root", "default":"${workspaceRoot}" }
                         }
                     }
                 }

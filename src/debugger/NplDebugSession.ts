@@ -12,12 +12,14 @@ import {
 } from 'vscode-debugadapter';
 import {DebugProtocol} from 'vscode-debugprotocol';
 import * as http from "http";
-import * as Utils from "./Utils";
-import * as Logger from "./Logger";
+import * as Utils from "../utils/Utils";
+import * as Logger from "../utils/Logger";
 import {basename} from 'path';
 export interface AttachRequestArguments extends DebugProtocol.AttachRequestArguments{
     ip:string,
-    port:string
+    port:string,
+    webRoot:string
+    
 }
 /*
 request commands
@@ -51,8 +53,10 @@ export class NplDebugSession extends DebugSession{
 	private mBreakpointId = 1000;
     private mCommittedBreakpointsByUrl:Map<string,number[]>;
     private mClientAttached:boolean = false;
-    private mHitBreakpointFile:string;
-    private mHitBreakpointLine:number;
+    private mWebRoot:string;
+    private mLastEvalResult = new Array<string>();
+    private mTimeout:number;
+    private mStackinfo:any = [];
     public constructor(){
         super();
     }
@@ -63,6 +67,7 @@ export class NplDebugSession extends DebugSession{
     private clearEverything():void{
         this.mClientAttached = false;
         this.mCommittedBreakpointsByUrl.clear();
+        this.mStackinfo = [];
     }
     private uploadBreakPoints(url:string,lines:number[]):Promise<void>{
         return  this.clearAllBreakpoints(url).then(()=>{
@@ -152,31 +157,33 @@ export class NplDebugSession extends DebugSession{
             clearInterval(this.mPollTimer);
             this.mPollTimer = null;
         }
+        this.clearEverything();
     }
     private handleMessage(msg:any):void{
         let cmd = msg.filename;
         Logger.log("cmd:" + cmd);
         if (cmd == "BP") {
-            let stackinfo = msg.code.stack_info;
-            let source = stackinfo[0].source;
-            let currentline = stackinfo[0].currentline;
-            Logger.log("source:" + source);
-            Logger.log("currentline:" + currentline);
-            this.mHitBreakpointFile = source;
-            this.mHitBreakpointLine = currentline;
-            this.sendEvent(new StoppedEvent("breakpoint",NplDebugSession.THREAD_ID));
+            this.mStackinfo = msg.code.stack_info; 
+            this.sendEvent(new StoppedEvent("step",NplDebugSession.THREAD_ID));
             return;
         }
         else if (cmd == "ExpValue") {
+            Logger.log(msg.code);
+            this.mLastEvalResult.push(String(msg.code));
+            
         }
         else if (cmd == "DebuggerOutput" && msg.code != null) {
             if (msg.code == "[DEBUG]> ") {
+                Logger.log("paused");
+                this.sendEvent(new StoppedEvent("pause",NplDebugSession.THREAD_ID));
             }
             else if (msg.code.substring(0, 10) == "Break at: ") {
                 var lineEnd = msg.code.indexOf(" in");
                 if (lineEnd > 0) {
                     var line = Number(msg.code.substr(10, lineEnd - 10));
                     var filename = msg.code.substr(lineEnd + 4, msg.code.length - lineEnd - 4).trim();
+                    Logger.log("breakpoint:" + filename);
+                    this.sendEvent(new StoppedEvent("breakpoint",NplDebugSession.THREAD_ID));
                     
                 }
             }
@@ -210,9 +217,11 @@ export class NplDebugSession extends DebugSession{
            return 
         }
         Logger.log(`attachRequest:${args.ip} ${args.port}`);
+        Logger.log(`webRoot:${args.webRoot}`);
         
         this.mIp = args.ip;
         this.mPort = args.port;
+        this.mWebRoot = args.webRoot;
         let s = this.getUrl("ajax/vscode_debugger?action=attach");
         this.load(s).then( rsp => {
             //TODO:one-by-one upload
@@ -267,13 +276,36 @@ export class NplDebugSession extends DebugSession{
         });
     }
     protected continueRequest(response: DebugProtocol.ContinueResponse, args: DebugProtocol.ContinueArguments): void {
+         Logger.log("continueRequest");
         let url = this.getUrl("ajax/vscode_debugger?action=continue");
         this.load(url).then(rsp => {
             this.sendResponse(response);
         })
     }
     protected nextRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments): void {
+        Logger.log("nextRequest");
         let url = this.getUrl("ajax/vscode_debugger?action=stepover");
+        this.load(url).then(rsp => {
+            this.sendResponse(response);
+        })
+    }
+    protected stepInRequest(response: DebugProtocol.StepInResponse, args: DebugProtocol.StepInArguments): void{
+        Logger.log("stepInRequest");
+        let url = this.getUrl("ajax/vscode_debugger?action=stepinto");
+        this.load(url).then(rsp => {
+            this.sendResponse(response);
+        })
+    }
+    protected stepOutRequest(response: DebugProtocol.StepOutResponse, args: DebugProtocol.StepOutArguments): void{
+        Logger.log("stepOutRequest");
+        let url = this.getUrl("ajax/vscode_debugger?action=stepout");
+        this.load(url).then(rsp => {
+            this.sendResponse(response);
+        })
+    }
+    protected pauseRequest(response: DebugProtocol.PauseResponse, args: DebugProtocol.PauseArguments): void{
+        Logger.log("pauseRequest");
+        let url = this.getUrl("ajax/vscode_debugger?action=pause");
         this.load(url).then(rsp => {
             this.sendResponse(response);
         })
@@ -291,11 +323,49 @@ export class NplDebugSession extends DebugSession{
     protected stackTraceRequest(response: DebugProtocol.StackTraceResponse, args: DebugProtocol.StackTraceArguments): void {
         Logger.log("stackTraceRequest");
 		const frames = new Array<StackFrame>();
-        //frames.push(new StackFrame(0,"frame name 111",new Source(basename(this.mHitBreakpointFile),this.convertDebuggerPathToClient(this.mHitBreakpointFile)), this.convertDebuggerLineToClient(this.mHitBreakpointLine), 0));
-        frames.push(new StackFrame(0,"frame name 111",new Source(basename(this.mHitBreakpointFile),this.mHitBreakpointFile), this.mHitBreakpointLine, 0));
+        for (var i = 0; i< this.mStackinfo.length; i++ ){
+            let bpFile = this.mWebRoot + "/" + this.mStackinfo[i].source;
+            let bpLine = this.mStackinfo[i].currentline;
+            if(bpFile && bpLine){
+                frames.push(new StackFrame(0,"frame name" + i,new Source(basename(bpFile),bpFile), bpLine, 0));
+            }
+        }
 		response.body = {
 			stackFrames: frames
 		};
 		this.sendResponse(response);
 	}
+    protected evaluateRequest(response: DebugProtocol.EvaluateResponse, args: DebugProtocol.EvaluateArguments): void{
+        Logger.log("evaluateRequest");
+        Logger.log(`evaluate(context: '${args.context}', '${args.expression}')`);
+        let code = args.expression;
+        if (args.expression.indexOf(";") < 0)
+                code = "return " + code;
+        Logger.log(`code:${code}`);
+        let url = this.getUrl("ajax/vscode_debugger?action=evaluate&code=" + encodeURIComponent(code));
+        this.mLastEvalResult.length = 0;
+        this.load(url).then(rsp => {
+                if(this.mTimeout){
+                    clearTimeout(this.mTimeout);
+                    this.mTimeout = undefined;
+                }  
+                //waitting for push msg into this.mLastEvalResult 
+                let p = new Promise((resolse,reject)=>{
+                    this.mTimeout = setTimeout(function() {
+                        resolse();
+                    }, 1000);
+                })
+                p.then(()=>{
+                    let result = "";
+                    this.mLastEvalResult.forEach((v)=>{
+                        result += v;
+                    }); 
+                    response.body = {
+                        result: result,
+                        variablesReference: 0    
+                    };
+                    this.sendResponse(response);
+                })
+        })
+    }
 }

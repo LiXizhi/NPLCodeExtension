@@ -9,11 +9,6 @@ export function log(msg:string):void{
     }
     mLogger.log(msg);
 }
-function logVersionInfo(): void {
-    log(`OS: ${os.platform()} ${os.arch()}`);
-    log('Node version: ' + process.version);
-    log('Adapter version: ' + require('../../../package.json').version);
-}
 class Logger{
     private mLogFileStream: fs.WriteStream;
     constructor(){

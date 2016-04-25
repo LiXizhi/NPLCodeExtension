@@ -12,9 +12,7 @@ let paracraft_runtime_dir:string;
 let paracraft_exe:string;
 
 //debugger
-import NplConnection = require("./NplConnection");
-import Logger = require("./Logger");
-let nplConn = new NplConnection.NplConnection();
+import Logger = require("./utils/Logger");
 function doStart()
 {
     vscode.window.setStatusBarMessage("paracraft_exe:" + paracraft_exe);
@@ -83,7 +81,6 @@ export function activate(context: vscode.ExtensionContext) {
         test();
     });
     let attach_cmd = vscode.commands.registerCommand('npldebugger.attach', () => {
-        nplConn.attach();
     });
      
     context.subscriptions.push(start_cmd,update_cmd,run_cmd,test_cmd,attach_cmd);
