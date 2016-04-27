@@ -11,20 +11,12 @@
         "Debuggers","Other"
     ],
     "activationEvents": [
-        "onCommand:npl.start",
-        "onCommand:npl.update",
-        "onCommand:npl.run",
-        "onCommand:npl.test",
-        "onCommand:npldebugger.attach"
+        "onCommand:npl.start"
     ],
     "main": "./out/Main",
     "contributes": {
        "commands": [
-            {"command": "npl.start","title": "npl start"},
-            {"command": "npl.update","title": "npl update"},
-            {"command": "npl.run","title": "npl run"},
-            {"command": "npl.test","title": "npl test"},
-            {"command": "npldebugger.attach","title": "npl debugger attach"}
+            {"command": "npl.start","title": "npl start"}
         ],
         "debuggers":[
             {

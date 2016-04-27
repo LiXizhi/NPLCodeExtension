@@ -12,7 +12,6 @@ import {
 } from 'vscode-debugadapter';
 import {DebugProtocol} from 'vscode-debugprotocol';
 import * as http from "http";
-import * as Utils from "../utils/Utils";
 import * as Logger from "../utils/Logger";
 import {basename} from 'path';
 export interface AttachRequestArguments extends DebugProtocol.AttachRequestArguments{
@@ -119,8 +118,17 @@ export class NplDebugSession extends DebugSession{
         return new Promise((resolse,reject)=>{
             Logger.log("load url:" + url);
             http.get(url,response=>{
+                var len = parseInt(response.headers['content-length'], 10);
+                var cur = 0;
+                var total = len / 1048576; //1048576 - bytes in  1Megabyte
                 let responseData = "";
-                response.on("data",chunk => responseData += chunk);
+                response.on("data",(chunk) => {
+                    responseData += chunk
+                    
+                    cur =  responseData.length;
+                    var progress = "Downloading " + (100.0 * cur / len).toFixed(2) + "% " + (cur / 1048576).toFixed(2) + " MB." + "Total size: " + total.toFixed(2) + " MB";
+                    Logger.log(progress);  
+                });
                 response.on("end",() =>{
                     if(response.statusCode == 200){
                         resolse(responseData);
@@ -170,24 +178,12 @@ export class NplDebugSession extends DebugSession{
         else if (cmd == "ExpValue") {
             Logger.log(msg.code);
             this.mLastEvalResult.push(String(msg.code));
-            
         }
-        else if (cmd == "DebuggerOutput" && msg.code != null) {
-            if (msg.code == "[DEBUG]> ") {
-                Logger.log("paused");
-                this.sendEvent(new StoppedEvent("pause",NplDebugSession.THREAD_ID));
-            }
-            else if (msg.code.substring(0, 10) == "Break at: ") {
-                var lineEnd = msg.code.indexOf(" in");
-                if (lineEnd > 0) {
-                    var line = Number(msg.code.substr(10, lineEnd - 10));
-                    var filename = msg.code.substr(lineEnd + 4, msg.code.length - lineEnd - 4).trim();
-                    Logger.log("breakpoint:" + filename);
-                    this.sendEvent(new StoppedEvent("breakpoint",NplDebugSession.THREAD_ID));
-                    
-                }
-            }
-        }
+        let p_1 = (!msg.filename)? "" : msg.filename;
+        let p_2 = (!msg.param1)? "" : msg.param1;
+        let p_3 = (!msg.param2)? "" : msg.param2;
+        let p_4 = (!msg.code)? "" : msg.code;
+        this.sendEvent(new OutputEvent(`${p_1}:${p_2},${p_3},${p_4}`));
     }
     /**
 	 * The 'initialize' request is the first request called by the frontend
@@ -327,6 +323,7 @@ export class NplDebugSession extends DebugSession{
             let bpFile = this.mWebRoot + "/" + this.mStackinfo[i].source;
             let bpLine = this.mStackinfo[i].currentline;
             if(bpFile && bpLine){
+                Logger.log(`${bpFile} ${bpLine}`);
                 frames.push(new StackFrame(0,"frame name" + i,new Source(basename(bpFile),bpFile), bpLine, 0));
             }
         }
@@ -335,9 +332,12 @@ export class NplDebugSession extends DebugSession{
 		};
 		this.sendResponse(response);
 	}
+    protected variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments): void{
+        Logger.log("variablesRequest");
+     }
     protected evaluateRequest(response: DebugProtocol.EvaluateResponse, args: DebugProtocol.EvaluateArguments): void{
         Logger.log("evaluateRequest");
-        Logger.log(`evaluate(context: '${args.context}', '${args.expression}')`);
+        Logger.log(`evaluate(context: ${args.context}, ${args.expression})`);
         let code = args.expression;
         if (args.expression.indexOf(";") < 0)
                 code = "return " + code;
@@ -357,7 +357,8 @@ export class NplDebugSession extends DebugSession{
                 })
                 p.then(()=>{
                     let result = "";
-                    this.mLastEvalResult.forEach((v)=>{
+                    let arr = this.mLastEvalResult.slice(); 
+                    arr.forEach((v)=>{
                         result += v;
                     }); 
                     response.body = {

@@ -9,9 +9,11 @@ yo code
 npm install -g vsce
 vsce package
 ```
-
 * install a packaged extension(.vsix) [details](https://code.visualstudio.com/docs/extensions/install-extension)
 ```
 code myExtensionFolder\nplruntime.vsix
 ```
-
+###using tsconfig.json
+```
+tsc -p ./src
+```
