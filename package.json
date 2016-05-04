@@ -1,7 +1,7 @@
 {
     "name": "nplextension",
-    "displayName": "Npl Extension",
-    "description": "",
+    "displayName": "Npl lua Extension",
+    "description": "NPL/Lua Debugger",
     "version": "0.0.1",
     "publisher": "leio",
     "engines": {
